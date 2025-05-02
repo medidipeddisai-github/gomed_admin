@@ -19,7 +19,7 @@ class UsersDataNotifier extends StateNotifier<UsersListModel> {
     try {
       loadingState.state = true;
       // Retrieve the token from SharedPreferences
-      print('get users');
+      print('get users api');
       final pref = await SharedPreferences.getInstance();
       String? userDataString = pref.getString('userData');
       if (userDataString == null || userDataString.isEmpty) {

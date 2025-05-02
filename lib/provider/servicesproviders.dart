@@ -35,7 +35,7 @@ class ServiceNotifier extends StateNotifier<ServiceModel> {
       //       ? userData['data'][0]['access_token']
       //       : null;
       // }
-      print('Retrieved Token: $token');
+      print('Retrieved Token from services: $token');
       // Initialize RetryClient for handling retries
       final client = RetryClient(
         http.Client(),

@@ -119,7 +119,7 @@ class User {
   final String? certificate;
   final String? experience;
   final String? ownerName;
-  final String? profileImage;
+  final List<String>? profileImage;
   final String? aadhar;
   final String? gstNumber;
   final String? firmName;
@@ -162,7 +162,7 @@ class User {
       certificate: "",
       experience: "",
       ownerName: "",
-      profileImage: "",
+      profileImage: [],
       aadhar: "",
       gstNumber: "",
       firmName: "",
@@ -185,7 +185,7 @@ class User {
     String? certificate,
     String? experience,
     String? ownerName,
-    String? profileImage,
+    List<String>? profileImage,
     String? aadhar,
     String? gstNumber,
     String? firmName,
@@ -228,7 +228,7 @@ class User {
       certificate: json['certificate'],
       experience: json['experience'],
       ownerName: json['ownerName'],
-      profileImage: json['profileImage'],
+      profileImage :json['profileImage'] != null ? List<String>.from(json['profileImage']) : [],
       aadhar: json['aadhar'],
       gstNumber: json['gstNumber'],
       firmName: json['firmName'],

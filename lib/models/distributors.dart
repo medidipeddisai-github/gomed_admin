@@ -65,6 +65,7 @@ class Data {
   String? email;
   String? address;
   List<String>? distributorImage;
+  String?ownerName;
   String? status;
   List<dynamic>? products; // Changed from List<Null> to List<dynamic>
   String? createdAt;
@@ -81,6 +82,7 @@ class Data {
     this.email,
     this.address,
     this.distributorImage,
+    this.ownerName,
     this.status,
     this.products,
     this.createdAt,
@@ -98,6 +100,7 @@ class Data {
     email = json['email'];
     address = json['address'];
     distributorImage = json['distributorImage'].cast<String>();
+    ownerName=json["ownerName"];
     status = json['status'];
     products = json['products'] ?? [];
     createdAt = json['createdAt'];
@@ -116,6 +119,7 @@ class Data {
     data['email'] = this.email;
     data['address'] = this.address;
     data['distributorImage'] = this.distributorImage;
+    data['ownerName']=this.ownerName;
     data['status'] = this.status;
     data['products'] = this.products;
     data['createdAt'] = this.createdAt;
@@ -135,6 +139,7 @@ class Data {
     String? email,
     String? address,
     List<String>? distributorImage,
+    String?ownerName,
     String? status,
     List<dynamic>? products,
     String? createdAt,
@@ -151,6 +156,7 @@ class Data {
       email: email ?? this.email,
       address: address ?? this.address,
       distributorImage: distributorImage ?? this.distributorImage,
+      ownerName:ownerName??this.ownerName,
       status: status ?? this.status,
       products: products ?? this.products,
       createdAt: createdAt ?? this.createdAt,
@@ -171,6 +177,7 @@ class Data {
       email: '',
       address: '',
       distributorImage: [],
+      ownerName:'',
       status: '',
       products: [],
       createdAt: '',

@@ -14,6 +14,8 @@ class ManageServices extends ConsumerStatefulWidget {
 }
 
 class _ManageServicesState extends ConsumerState<ManageServices> {
+
+    String searchQuery = '';
   @override
   void initState() {
     super.initState();
@@ -25,8 +27,23 @@ class _ManageServicesState extends ConsumerState<ManageServices> {
   Widget build(BuildContext context) {
     final engineers = ref.watch(serviceEngineerProvider).data ?? [];
     final services = ref.watch(serviceprovider).data ?? [];
+
+    
+    // 🟢 FILTER ENGINEERS by search query
+    final query = searchQuery.trim().toLowerCase();
+    final filteredEngineers = engineers.where((engineer) {
+      final name = engineer.name?.toLowerCase() ?? '';
+      final email = engineer.email?.toLowerCase() ?? '';
+      return name.contains(query) || email.contains(query);
+    }).toList();
+
+    final displayedEngineers = filteredEngineers.isEmpty && query.isNotEmpty
+    ? engineers
+    : filteredEngineers;
+
      final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
     return SafeArea(
       child: Scaffold(
         body: Column(
@@ -43,7 +60,9 @@ class _ManageServicesState extends ConsumerState<ManageServices> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 onChanged: (query) {
-                  setState(() {});
+                  setState(() {
+                    searchQuery = query;
+                  });
                 },
               ),
             ),
@@ -73,9 +92,9 @@ class _ManageServicesState extends ConsumerState<ManageServices> {
             // Service Engineers List
             Expanded(
               child: ListView.builder(
-                itemCount: engineers.length,
+                itemCount:displayedEngineers.length,
                 itemBuilder: (context, index) {
-                  final engineer = engineers[index];
+                  final engineer = displayedEngineers[index];
                   final engineerServices = engineer.serviceIds?.map((id) {
                     return services.firstWhere((s) => s.sId == id, orElse: () => service_model.Data(name: 'Unknown')).name;
                   }).toList() ?? [];

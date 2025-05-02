@@ -36,7 +36,7 @@ class _VendorListState extends ConsumerState<VendorList> {
     double userListHeight = screenHeight * 0.6;
 
     final filteredUsers = distributors.where((user) {
-      return (user.name?.toLowerCase().contains(searchQuery.toLowerCase()) ??
+      return (user.ownerName?.toLowerCase().contains(searchQuery.toLowerCase()) ??
               false) ||
           (user.email?.toLowerCase().contains(searchQuery.toLowerCase()) ??
               false);
@@ -128,7 +128,7 @@ Widget _buildUserList(List<Data> distributors) {
                   children: [
                     Expanded(
                       child: Text(
-                        distributor.name ?? "No Name",
+                        distributor.ownerName ?? "No Name",
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

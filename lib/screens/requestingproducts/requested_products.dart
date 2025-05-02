@@ -71,7 +71,7 @@ class _RequestedProductsScreenState extends ConsumerState<RequestedProductsScree
    String getDistributorName(String id) {
     try {
       final dist = distributorData.firstWhere((d) => d.sId == id);
-      return dist.name ?? 'Unknown';
+      return dist.ownerName?? 'Unknown';
     } catch (e) {
       print("Distributor not found for ID: $id");
       return 'Unknown';

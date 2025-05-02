@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gomed_admin/provider/loginprovider.dart';
+import 'package:gomed_admin/widgets/topbar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import "package:gomed_admin/models/login_model.dart";
 
 class AdminProfile extends ConsumerStatefulWidget {
   const AdminProfile({super.key});
@@ -20,6 +22,7 @@ class _AdminProfileState extends ConsumerState<AdminProfile> {
   final _validationKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
   File? _profileImage;
+  User? user;
 
   @override
   void initState() {
@@ -28,13 +31,18 @@ class _AdminProfileState extends ConsumerState<AdminProfile> {
   }
 
   void _loadUserProfile() {
-    // Fetch existing user details from API or local storage
+  final fetchedUser = ref.read(loginProvider).data?.first.user;
+
+  if (fetchedUser != null) {
     setState(() {
-      nameController.text = "John Doe"; // Replace with actual user name
-      emailController.text = "john.doe@example.com"; // Replace with actual email
-      _profileImage = null; // Replace with user's existing profile image if available
+      user = fetchedUser;
+      nameController.text = user?.name ?? '';
+      emailController.text = user?.email ?? '';
     });
   }
+}
+
+
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -91,85 +99,83 @@ class _AdminProfileState extends ConsumerState<AdminProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Update Profile'),
-        backgroundColor: const Color(0xFF2A9D8F),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _validationKey,
-            child: Column(
-              children: [
-                _buildImageUploadSection(),
-                const SizedBox(height: 20),
-                _buildTextField(nameController, "User Name", "Please enter user name"),
-                _buildTextField(emailController, "Email", "Please enter email",
-                    keyboardType: TextInputType.emailAddress),
-                _buildTextField(passwordController, "New Password (optional)", "", obscureText: true),
-                _buildTextField(confirmPasswordController, "Confirm Password", "", obscureText: true),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () async {
-
-                    if (_validationKey.currentState!.validate()) {
-                      if (passwordController.text.isNotEmpty &&
-                          passwordController.text != confirmPasswordController.text) {
-                        _showAlertDialog("Error", "Passwords do not match!");
-                        return ;
-                        }
-                      try {
-                          await ref .read(loginProvider.notifier).updateProfile(
-                                      nameController.text,
-                                      emailController.text,
-                                      passwordController.text,
-                                      _profileImage,
-                                      ref,
-                                      );
-
-                              // Clear form fields
-                              // productNameController.clear();
-                              // priceController.clear();
-                              // descriptionController.clear();
-                              // categoryController.clear();
-                               Navigator.of(context).pop();
-
-                              _showSnackBar(
-                                  context, "Profile updated successfully!");
-                               
-                                
-                            } catch (e) {
-                              _showSnackBar(context, e.toString());
-                            } 
-
-                          // // Call API to update profile
-                          // ScaffoldMessenger.of(context).showSnackBar(
-                          //   const SnackBar(
-                          //     content: Text("Profile updated successfully!"),
-                          //     backgroundColor: Colors.green,
-                          //   ),
-                          // );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2A9D8F),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+    return SafeArea(
+      child: Scaffold(
+        appBar: PreferredSize(
+                preferredSize: Size.fromHeight(80),
+                child: TopBar(title: 'Update Profile', onBackPressed: () => Navigator.pop(context)),
+              ),
+        body: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _validationKey,
+              child: Column(
+                children: [
+                  _buildImageUploadSection(),
+                  const SizedBox(height: 20),
+                  _buildTextField(nameController, "User Name", "Please enter user name"),
+                  _buildTextField(emailController, "Email", "Please enter email",
+                      keyboardType: TextInputType.emailAddress),
+                  _buildTextField(passwordController, "New Password (optional)", "", obscureText: true),
+                  _buildTextField(confirmPasswordController, "Confirm Password", "", obscureText: true),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () async {
+      
+                      if (_validationKey.currentState!.validate()) {
+                        if (passwordController.text.isNotEmpty &&
+                            passwordController.text != confirmPasswordController.text) {
+                          _showAlertDialog("Error", "Passwords do not match!");
+                          return ;
+                          }
+                        try {
+                            await ref .read(loginProvider.notifier).updateProfile(
+                                        nameController.text,
+                                        emailController.text,
+                                        passwordController.text,
+                                        _profileImage,
+                                        ref,
+                                        );
+      
+                                // Clear form fields
+                                // productNameController.clear();
+                                // priceController.clear();
+                                // descriptionController.clear();
+                                // categoryController.clear();
+                                 Navigator.of(context).pop();
+      
+                                _showSnackBar(
+                                    context, "Profile updated successfully!");
+                                 
+                                  
+                              } catch (e) {
+                                _showSnackBar(context, e.toString());
+                              } 
+      
+                            // // Call API to update profile
+                            // ScaffoldMessenger.of(context).showSnackBar(
+                            //   const SnackBar(
+                            //     content: Text("Profile updated successfully!"),
+                            //     backgroundColor: Colors.green,
+                            //   ),
+                            // );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2A9D8F),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      "Update Profile",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
-                  child: const Text(
-                    "Update Profile",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -177,40 +183,31 @@ class _AdminProfileState extends ConsumerState<AdminProfile> {
     );
   }
 
-  Widget _buildImageUploadSection() {
-    return GestureDetector(
-      onTap: _showImageSourceDialog,
-      child: Container(
-        width: double.infinity,
-        height: 150,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.shade400),
-        ),
-        child: Center(
-          child: _profileImage != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.file(
-                    _profileImage!,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                  ),
-                )
-              : const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.camera_alt, size: 40, color: Colors.black54),
-                    SizedBox(height: 10),
-                    Text("Upload Profile Image", style: TextStyle(color: Colors.black54)),
-                  ],
-                ),
-        ),
+ Widget _buildImageUploadSection() {
+  String? profileImageUrl = (user?.profileImage != null && user!.profileImage!.isNotEmpty)
+      ? user!.profileImage!.first
+      : null;
+
+  return GestureDetector(
+    onTap: _showImageSourceDialog,
+    child: Center(
+      child: CircleAvatar(
+        radius: 60,
+        backgroundColor: Colors.grey[300],
+        backgroundImage: _profileImage != null
+            ? FileImage(_profileImage!) // user picked image
+            : (profileImageUrl != null)
+                ? NetworkImage(profileImageUrl) // API image
+                : null,
+        child: (_profileImage == null && profileImageUrl == null)
+            ? const Icon(Icons.camera_alt, size: 40, color: Colors.black54)
+            : null,
       ),
-    );
-  }
+    ),
+  );
+}
+
+
 
   Widget _buildTextField(
     TextEditingController controller,
