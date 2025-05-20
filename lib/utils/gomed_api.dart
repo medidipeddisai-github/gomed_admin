@@ -34,6 +34,7 @@ class Bbapi {
   static const String update = "$baseUrl/products/updateproduct";
   static const String delete = "$baseUrl/products/deleteproduct";
   
+  
   static const String addcategory = "$baseUrl/products/category/create";
   static const String getcategory = "$baseUrl/products/category/all";
   static const String updatecategory = "$baseUrl/products/category/update";

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gomed_admin/provider/loginprovider.dart';
 import 'package:gomed_admin/screens/adminProfile.dart';
 import 'package:gomed_admin/screens/adminaddservices/services_edit.dart';
@@ -21,6 +22,10 @@ import 'package:gomed_admin/screens/notification_settings.dart';
 import 'package:gomed_admin/screens/settings_screen.dart';
 import 'package:gomed_admin/widgets/bottomnavigation.dart';
 
+
+// 🟢 Global key for showing SnackBar from anywhere
+final GlobalKey<ScaffoldMessengerState> globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
   runApp(
     const ProviderScope(
@@ -31,26 +36,60 @@ void main() async {
 // Authentication state provider
 final authStateProvider = StateProvider<bool>((ref) => false);
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
+  @override
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  late final Connectivity _connectivity;
+  late final Stream<ConnectivityResult> _connectivityStream;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-   
+  void initState() {
+    super.initState();
+
+    _connectivity = Connectivity();
+   _connectivityStream = _connectivity.onConnectivityChanged.map((list) => list.first);
+
+
+    _connectivityStream.listen((ConnectivityResult result) {
+      final isConnected = result != ConnectivityResult.none;
+
+      globalMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(
+            isConnected ? '✅ Back online' : '🚫 No internet connection',
+          ),
+          backgroundColor: isConnected ? Colors.green : Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+      final authState = ref.watch(loginProvider);
+    final accessToken = authState.data?.isNotEmpty == true
+        ? authState.data![0].accessToken
+        : null;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: globalMessengerKey,
       home: Consumer(builder: (context, ref, child) {
-        print("build main.dart");
+        // print("build main.dart");
 
-        final authState = ref.watch(loginProvider);
-        // Watch the authentication state
-        // Check for a valid access token
-        final accessToken = authState.data?.isNotEmpty == true
-            ? authState.data![0].accessToken: null;
+        // final authState = ref.watch(loginProvider);
+        // // Watch the authentication state
+        // // Check for a valid access token
+        // final accessToken = authState.data?.isNotEmpty == true
+        //     ? authState.data![0].accessToken: null;
 
         print('token/main $accessToken');
-        // Check if the user has a valid refresh token
+        // // Check if the user has a valid refresh token
         if (accessToken != null && accessToken.isNotEmpty) {
           return const CustomBottomNavigationBar(); // User is authenticated, redirect to Home
         } else {

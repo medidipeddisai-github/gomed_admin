@@ -29,17 +29,11 @@ class _ManageServicesState extends ConsumerState<ManageServices> {
     final services = ref.watch(serviceprovider).data ?? [];
 
     
-    // 🟢 FILTER ENGINEERS by search query
-    final query = searchQuery.trim().toLowerCase();
-    final filteredEngineers = engineers.where((engineer) {
-      final name = engineer.name?.toLowerCase() ?? '';
-      final email = engineer.email?.toLowerCase() ?? '';
-      return name.contains(query) || email.contains(query);
-    }).toList();
-
-    final displayedEngineers = filteredEngineers.isEmpty && query.isNotEmpty
-    ? engineers
-    : filteredEngineers;
+  // 🟢 FILTER ENGINEERS by search query
+final filteredEngineers = engineers.where((engineer) {
+  return (engineer.name?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false) ||
+         (engineer.email?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false);
+}).toList();
 
      final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -91,10 +85,15 @@ class _ManageServicesState extends ConsumerState<ManageServices> {
 
             // Service Engineers List
             Expanded(
-              child: ListView.builder(
-                itemCount:displayedEngineers.length,
+                        child:filteredEngineers.isEmpty && searchQuery.isNotEmpty
+                ? const Center(
+                    child: Text('No engineers found',
+                        style: TextStyle(fontSize: 16, color: Colors.grey)),
+                  )
+                :  ListView.builder(
+                itemCount:filteredEngineers.length,
                 itemBuilder: (context, index) {
-                  final engineer = displayedEngineers[index];
+                  final engineer = filteredEngineers[index];
                   final engineerServices = engineer.serviceIds?.map((id) {
                     return services.firstWhere((s) => s.sId == id, orElse: () => service_model.Data(name: 'Unknown')).name;
                   }).toList() ?? [];

@@ -22,21 +22,14 @@ class ServicesListNotifier extends StateNotifier<Serviceslistmodel> {
       loadingState.state = true;
       // Retrieve the token from SharedPreferences
       print('get serviceslist');
-      final pref = await SharedPreferences.getInstance();
-      String? userDataString = pref.getString('userData');
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
+
+      // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
+
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
       }
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
-      // String? token = userData['accessToken'];
-      // if (token == null || token.isEmpty) {
-      //   token = userData['data'] != null &&
-      //           (userData['data'] as List).isNotEmpty &&
-      //           userData['data'][0]['access_token'] != null
-      //       ? userData['data'][0]['access_token']
-      //       : null;
-      // }
       print('Retrieved Token from getservicelist: $token');
       // Initialize RetryClient for handling retries
       final client = RetryClient(
@@ -94,24 +87,13 @@ Future<void> updatservicelist(
 
   try {
     loadingState.state = true;
-    final prefs = await SharedPreferences.getInstance();
-    String? userDataString = prefs.getString('userData');
+     // ✅ Get token directly from loginProvider model
+    final currentUser = ref.read(loginProvider);
+    final token = currentUser.data?.first.accessToken;
 
-    if (userDataString == null || userDataString.isEmpty) {
-      throw Exception("User token is missing. Please log in again.");
+    if (token == null || token.isEmpty) {
+      throw Exception("Access token is missing. Please log in again.");
     }
-
-    final Map<String, dynamic> userData = jsonDecode(userDataString);
-    String? token = userData['data'][0]['access_token'];
-    // String? token = userData['accessToken'];
-
-    // if (token == null || token.isEmpty) {
-    //   token = userData['data'] != null &&
-    //           (userData['data'] as List).isNotEmpty &&
-    //           userData['data'][0]['access_token'] != null
-    //       ? userData['data'][0]['access_token']
-    //       : null;
-    // }
 
     print('Retrieved Token: $token');
 
@@ -191,25 +173,13 @@ Future<void> updatservicelist(
    try {
 
         loadingState.state = true;
-        final prefs = await SharedPreferences.getInstance();
-        String? userDataString = prefs.getString('userData');
+          // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-        if (userDataString == null || userDataString.isEmpty) {
-          throw Exception("User token is missing. Please log in again.");
-        }
-
-
-        final Map<String, dynamic> userData = jsonDecode(userDataString);
-        String? token = userData['data'][0]['access_token'];
-        // String? token = userData['accessToken'];
-
-        // if (token == null || token.isEmpty) {
-        //   token = userData['data'] != null &&
-        //           (userData['data'] as List).isNotEmpty &&
-        //           userData['data'][0]['access_token'] != null
-        //       ? userData['data'][0]['access_token']
-        //       : null;
-        // }
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
+      }
 
     print('Retrieved Token: $token');
       final client = RetryClient(

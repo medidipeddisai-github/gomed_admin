@@ -40,16 +40,13 @@ class Sparepartprovider extends StateNotifier<SparePartModel> {
         print("No images available.");
       }
 
-      // Get stored user token
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataString = prefs.getString('userData');
+            // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
       }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-       String? token = userData['data'][0]['access_token'];
 
       // Initialize HTTP retry client
       final client = RetryClient(
@@ -139,21 +136,13 @@ class Sparepartprovider extends StateNotifier<SparePartModel> {
     try {
       loadingState.state = true;
 
-      // Retrieve the token from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataString = prefs.getString('userData');
-
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-       String? token = userData['data'][0]['access_token'];
+            // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
       if (token == null || token.isEmpty) {
-        throw Exception("User token is invalid. Please log in again.");
+        throw Exception("Access token is missing. Please log in again.");
       }
-
       print('Retrieved Token: $token');
 
       // Initialize RetryClient for handling retries
@@ -222,18 +211,12 @@ class Sparepartprovider extends StateNotifier<SparePartModel> {
         'sparepartupdate data sparepartname:$sparePartName,description:$description,image:${images!.length},spareparId:$sparePartId,');
 
     try {
-      // Retrieve token from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final String? userDataString = prefs.getString('userData');
+           // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-       String? token = userData['data'][0]['access_token'];
       if (token == null || token.isEmpty) {
-        throw Exception("User token is invalid. Please log in again.");
+        throw Exception("Access token is missing. Please log in again.");
       }
 
       print('Retrieved Token: $token');
@@ -344,16 +327,13 @@ class Sparepartprovider extends StateNotifier<SparePartModel> {
 
      
       loadingState.state = true; // Show loading state
+      // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-      final prefs = await SharedPreferences.getInstance();
-      final String? userDataString = prefs.getString('userData');
-
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
       }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-       String? token = userData['data'][0]['access_token'];
       final client = RetryClient(
         http.Client(),
         retries: 4,

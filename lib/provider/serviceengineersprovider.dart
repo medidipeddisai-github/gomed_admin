@@ -21,25 +21,32 @@ class ServiceEngineerNotifier extends StateNotifier<ServiceEngineerModel> {
       loadingState.state = true;
       print('get serviceenginerrs');
 
-      // Retrieve the token from SharedPreferences
-      final pref = await SharedPreferences.getInstance();
-      String? userDataString = pref.getString('userData');
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
-      // String? token = userData['accessToken'];
-      // if (token == null || token.isEmpty) {
-      //   token = userData['data'] != null &&
-      //           (userData['data'] as List).isNotEmpty &&
-      //           userData['data'][0]['access_token'] != null
-      //       ? userData['data'][0]['access_token']
-      //       : null;
-      // }
-      print('Retrieved Token: $token');
+     // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-      final response = await http.get(
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
+      }
+      print('Retrieved Token from getservicelist: $token');
+      // Initialize RetryClient for handling retries
+      final client = RetryClient(
+        http.Client(),
+        retries: 3, // Retry up to 3 times
+        when: (response) =>
+            response.statusCode == 401 || response.statusCode == 400,
+        onRetry: (req, res, retryCount) async {
+          if (retryCount == 0 &&
+              (res?.statusCode == 401 || res?.statusCode == 400)) {
+            String? newAccessToken =
+                await ref.read(loginProvider.notifier).restoreAccessToken();
+            req.headers['Authorization'] = 'Bearer $newAccessToken';
+            print("refreshed serce token $newAccessToken");
+          }
+          
+        },
+      );
+      final response = await client.get(
         Uri.parse(Bbapi.getServiceengineers),
         headers: {
           "Authorization": "Bearer $token",
@@ -49,34 +56,34 @@ class ServiceEngineerNotifier extends StateNotifier<ServiceEngineerModel> {
       print('Get serviceengineers Status Code: ${response.statusCode}');
       print('Get serviceengineers Response Body: ${response.body}');
 
-      if (response.statusCode == 401) {
-        print("Token expired, attempting refresh...");
-        String? newAccessToken =
-            await ref.read(loginProvider.notifier).restoreAccessToken();
+      // if (response.statusCode == 401) {
+      //   print("Token expired, attempting refresh...");
+      //   String? newAccessToken =
+      //       await ref.read(loginProvider.notifier).restoreAccessToken();
 
-        if (newAccessToken.isNotEmpty) {
-          userData['accessToken'] = newAccessToken;
-          pref.setString('userData', jsonEncode(userData));
+      //   if (newAccessToken.isNotEmpty) {
+      //     userData['accessToken'] = newAccessToken;
+      //     pref.setString('userData', jsonEncode(userData));
 
-          final retryResponse = await http.get(
-            Uri.parse(Bbapi.getServiceengineers),
-            headers: {
-              "Authorization": "Bearer $newAccessToken",
-            },
-          );
+      //     final retryResponse = await http.get(
+      //       Uri.parse(Bbapi.getServiceengineers),
+      //       headers: {
+      //         "Authorization": "Bearer $newAccessToken",
+      //       },
+      //     );
 
-          print('Retry Get serviceengineers Status Code: ${retryResponse.statusCode}');
-          print('Retry Get serviceengineers Response Body: ${retryResponse.body}');
+      //     print('Retry Get serviceengineers Status Code: ${retryResponse.statusCode}');
+      //     print('Retry Get serviceengineers Response Body: ${retryResponse.body}');
 
-          if (retryResponse.statusCode == 200 || retryResponse.statusCode == 201) {
-            final res = json.decode(retryResponse.body);
-            final serviceengineerData = ServiceEngineerModel.fromJson(res);
-            state = serviceengineerData;
-            print("serviceengineers fetched successfully.${serviceengineerData.messages}");
-            return;
-          }
-        }
-      }
+      //     if (retryResponse.statusCode == 200 || retryResponse.statusCode == 201) {
+      //       final res = json.decode(retryResponse.body);
+      //       final serviceengineerData = ServiceEngineerModel.fromJson(res);
+      //       state = serviceengineerData;
+      //       print("serviceengineers fetched successfully.${serviceengineerData.messages}");
+      //       return;
+      //     }
+      //   }
+      // }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final res = json.decode(response.body);
@@ -111,23 +118,14 @@ class ServiceEngineerNotifier extends StateNotifier<ServiceEngineerModel> {
 
     try {
       loadingState.state = true;
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataStringString = prefs.getString('userData');
-      print('printed.......ase..........');
-      if (userDataStringString == null || userDataStringString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-      final Map<String, dynamic> userData = jsonDecode(userDataStringString);
-      String? token = userData['data'][0]['access_token'];
-      // String? token = userData['accessToken'];
 
-      // if (token == null || token.isEmpty) {
-      //   token = userData['data'] != null &&
-      //           (userData['data'] as List).isNotEmpty &&
-      //           userData['data'][0]['access_token'] != null
-      //       ? userData['data'][0]['access_token']
-      //       : null;
-      // }
+          // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
+
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
+      }
 
       print('Retrieved Token: $token');
       final client = RetryClient(
@@ -208,24 +206,13 @@ Future<void> updateEngineer(
 
   try {
     loadingState.state = true;
-    final prefs = await SharedPreferences.getInstance();
-    String? userDataString = prefs.getString('userData');
+     // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-    if (userDataString == null || userDataString.isEmpty) {
-      throw Exception("User token is missing. Please log in again.");
-    }
-
-    final Map<String, dynamic> userData = jsonDecode(userDataString);
-    String? token = userData['data'][0]['access_token'];
-    // String? token = userData['accessToken'];
-
-    // if (token == null || token.isEmpty) {
-    //   token = userData['data'] != null &&
-    //           (userData['data'] as List).isNotEmpty &&
-    //           userData['data'][0]['access_token'] != null
-    //       ? userData['data'][0]['access_token']
-    //       : null;
-    // }
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
+      }
 
     print('Retrieved Token: $token');
 
@@ -318,16 +305,13 @@ Future<void> updateEngineer(
   try {
    
     loadingState.state = true; // Show loading state
+     // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-    final prefs = await SharedPreferences.getInstance();
-    String? userDataString = prefs.getString('userData');
-
-    if (userDataString == null || userDataString.isEmpty) {
-      throw Exception("User token is missing. Please log in again.");
-    }
-
-    final Map<String, dynamic> userData = jsonDecode(userDataString);
-    String? token = userData['data'][0]['access_token'];
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
+      }
 
 
     print('Retrieved Token: $token');

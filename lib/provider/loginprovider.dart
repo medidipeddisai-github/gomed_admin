@@ -104,6 +104,7 @@ Future<UserModel> login({
 
         // Update the state
         state = user;
+        
         print("Login state updated: ${state.toJson()}");
         return user;
       } else {
@@ -125,30 +126,27 @@ Future<String> restoreAccessToken() async {
 
     try {
         // Retrieve stored user data
-    String? storedUserData = prefs.getString('userData');
-    if (storedUserData == null) {
-      throw Exception("No stored Admin data found.");
-    }
+    // ✅ Prefer getting from loginProvider instead of SharedPreferences
+        final currentUser = ref.read(loginProvider);
+        final currentRefreshToken = currentUser.data?.first.refreshToken;
+        final currentAccesstoken =currentUser.data?.first.accessToken;
 
-    UserModel user = UserModel.fromJson(json.decode(storedUserData));
-    String? currentRefreshToken = user.data?.isNotEmpty == true ? user.data![0].refreshToken : null;
+        if (currentRefreshToken == null || currentRefreshToken.isEmpty) {
+          throw Exception("No valid refresh token found.");
+        }
 
-    print("older refreshtoken: $currentRefreshToken");
-    print('older access token: ${user.data![0].accessToken}');
-    
-    if (currentRefreshToken == null || currentRefreshToken.isEmpty) {
-      throw Exception("No valid refresh token found.");
-    }
+        print("Using refresh token: $currentRefreshToken");
+        print("using current accesstoken: $currentAccesstoken");
 
-     var response = await http.post(
-      Uri.parse(url),
-      headers: {  
-        'Authorization': 'Bearer $currentRefreshToken',
-         'Content-Type': 'application/json; charset=UTF-8',
+        final response = await http.post(
+          Uri.parse(url),
+          headers: {
+            'Authorization': 'Bearer $currentRefreshToken',
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: json.encode({"refresh_token": currentRefreshToken}),
+        );
 
-      },
-      body: json.encode({"refresh_token": currentRefreshToken}),
-    );
 
       var userDetails = json.decode(response.body);
       print('restore token response $userDetails');
@@ -204,7 +202,9 @@ Future<String> restoreAccessToken() async {
             // Debug: Print user data after saving
             print("User Data saved in SharedPreferences: ${prefs.getString('userData')}");
             print("updated accesstoken ${user.data![0].accessToken}");
-
+ 
+            // ✅ Update the provider state globally
+            ref.read(loginProvider.notifier).state = user;
             return newAccessToken; // Return the new access token
           } else {
 
@@ -354,7 +354,7 @@ Future<String> restoreAccessToken() async {
     }
   }
 
-  Future<void> deleteAccount(String?userId, String?token ,BuildContext context) async {
+  Future<void> deleteAccount(String?userId, String?token ) async {
   final String apiUrl = "${Bbapi.deleteAdminProfile}/$userId"; // Replace with your API URL for delete account
   final loadingState = ref.read(loadingProvider.notifier);
 

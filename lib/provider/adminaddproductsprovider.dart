@@ -40,19 +40,12 @@ class ProductProvider extends StateNotifier<ProductModel> {
       } else {
         print("No images available.");
       }
-      // Retrieve the token from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataString = prefs.getString('userData');
-
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
+      // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
       if (token == null || token.isEmpty) {
-        throw Exception("User token is invalid. Please log in again.");
+        throw Exception("Access token is missing. Please log in again.");
       }
 
       print('Retrieved Token: $token');
@@ -153,22 +146,13 @@ class ProductProvider extends StateNotifier<ProductModel> {
 
     try {
       loadingState.state = true;
-
-      // Retrieve the token from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataString = prefs.getString('userData');
-
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
+      // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
       if (token == null || token.isEmpty) {
-        throw Exception("User token is invalid. Please log in again.");
+        throw Exception("Access token is missing. Please log in again.");
       }
-
       print('Retrieved Token: $token');
 
       // Initialize RetryClient for handling retries
@@ -239,24 +223,19 @@ class ProductProvider extends StateNotifier<ProductModel> {
     String? productId,
     List<File>? image,
   ) async {
+
     final loadingState = ref.read(loadingProvider.notifier);
     loadingState.state = true;
      print('productupdate data productNamename:$productName,description:$description,image:$image,productIdId:$productId');
 
     try {
       // Retrieve the token from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataString = prefs.getString('userData');
-
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
+     // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
       if (token == null || token.isEmpty) {
-        throw Exception("User token is invalid. Please log in again.");
+        throw Exception("Access token is missing. Please log in again.");
       }
 
       print('Retrieved Token: $token');
@@ -304,7 +283,7 @@ class ProductProvider extends StateNotifier<ProductModel> {
       }
 
       // Sending Request
-      final response = await request.send();
+      final response = await client.send(request);
 
       // Reading Response
       final responseBody = await response.stream.bytesToString();
@@ -336,18 +315,12 @@ class ProductProvider extends StateNotifier<ProductModel> {
    
       loadingState.state = true; // Show loading state
 
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataString = prefs.getString('userData');
+      // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
-
-       if (token == null || token.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
       }
       final client = RetryClient(
         http.Client(),

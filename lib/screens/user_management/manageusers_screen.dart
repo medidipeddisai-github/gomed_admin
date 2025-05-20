@@ -55,13 +55,17 @@ class _ManageUsersScreenState extends ConsumerState<ManageUsersScreen> {
             _buildSearchBar(paddingHorizontal, searchBarHeight),
             SizedBox(height: screenHeight * 0.01),
             _buildUserListRow(paddingHorizontal),
-            Expanded(
-              child: usersState.data == null || usersState.data!.isEmpty
+           Expanded(
+              child: filteredUsers.isEmpty && searchQuery.isNotEmpty
                   ? const Center(
-                      child: CircularProgressIndicator(),
+                      child: Text(
+                        'No users found',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
                     )
                   : _buildUserList(filteredUsers),
             ),
+
           ],
         ),
         

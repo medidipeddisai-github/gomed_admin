@@ -20,23 +20,16 @@ class UsersDataNotifier extends StateNotifier<UsersListModel> {
       loadingState.state = true;
       // Retrieve the token from SharedPreferences
       print('get users api');
-      final pref = await SharedPreferences.getInstance();
-      String? userDataString = pref.getString('userData');
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
-      // print("pre token users--$pretoken");
-      // String? token = userData['accessToken'];
-      // print("token users----$token");
-      // if (token == null || token.isEmpty) {
-      //   token = userData['data'] != null &&
-      //           (userData['data'] as List).isNotEmpty &&
-      //           userData['data'][0]['access_token'] != null
-      //       ? userData['data'][0]['access_token']
-      //       : null;
-      // }
+
+      
+    // ✅ Get token directly from loginProvider model
+    final currentUser = ref.read(loginProvider);
+    final token = currentUser.data?.first.accessToken;
+
+    if (token == null || token.isEmpty) {
+      throw Exception("Access token is missing. Please log in again.");
+    }
+    
       print('Retrieved Token from users: $token');
       // Initialize RetryClient for handling retries
       final client = RetryClient(

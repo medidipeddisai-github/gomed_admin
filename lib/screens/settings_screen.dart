@@ -129,53 +129,49 @@ class _SettingsPageState extends ConsumerState<SettingsScreen> {
       ),
     );
   }
-  void _showDeleteAccountDialog(BuildContext context, WidgetRef ref) {
+  void _showDeleteAccountDialog(BuildContext parentContext, WidgetRef ref) {
   final userModel = ref.read(loginProvider); // Retrieve UserModel from the provider
   final userId = userModel.data?[0].user?.sId; // Get user ID, default to empty string if null
   final token = userModel.data?[0].accessToken; // Get token, default to empty string if null
 
   showDialog(
-    context: context,
-    builder: (BuildContext context) {
+    context: parentContext,
+    builder: (BuildContext dialogContext) {
       return AlertDialog(
         title: const Text('Delete Account'),
         content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(dialogContext).pop(); // ✅ close dialog using dialogContext
             },
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-               Navigator.of(context).pop();
+               Navigator.of(dialogContext).pop(); // ✅ close dialog first
 
               try {
-                await ref.read(loginProvider.notifier).deleteAccount(userId, token,context);
+                await ref.read(loginProvider.notifier).deleteAccount(userId, token);
 
-                // // ✅ Show success message safely
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   const SnackBar(content: Text('Account deleted successfully')),
-                // );
+                    if (!mounted) return; // ✅ ensure widget is still alive
 
-                // // ✅ Use Future.microtask to safely navigate AFTER widget tree stabilizes
-                // Future.microtask(() {
-                //   Navigator.pushAndRemoveUntil(
-                //     context,
-                //     MaterialPageRoute(builder: (context) => LoginScreen()),
-                //     (route) => false, // Removes all previous routes from the stack
-                //   );
-                // });
-                  _removeAccount(context);
+                    ScaffoldMessenger.of(parentContext).showSnackBar(
+                      const SnackBar(content: Text('Account deleted successfully')),
+                    );
+
+                    Navigator.of(parentContext).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => LoginScreen()),
+                      (route) => false,
+                    );
                   
               } catch (error) {
-                print("Error deleting account: $error");
+                   print("Error deleting account: $error");
+                    if (!mounted) return;
 
-                // ✅ Show error message if deletion fails
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Failed to delete account. Please try again.')),
-                );
+                    ScaffoldMessenger.of(parentContext).showSnackBar(
+                      const SnackBar(content: Text('Failed to delete account. Please try again.')),
+                    );
               }
               },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
@@ -188,8 +184,6 @@ class _SettingsPageState extends ConsumerState<SettingsScreen> {
 void _removeAccount(BuildContext context) {
     // Add your account deletion logic here (e.g., API call or local storage update)
 
-    // Example: Show a snackbar and navigate back
-    Navigator.of(context).pop(); // Close the dialog
     ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(content: Text('Account deleted successfully')),
     );

@@ -23,15 +23,13 @@ class ServiceProvider extends StateNotifier<ServiceModel> {
 
     try {
       loadingState.state = true;
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataStringString = prefs.getString('userData');
-      print('printed.................');
-      if (userDataStringString == null || userDataStringString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-      final Map<String, dynamic> userData = jsonDecode(userDataStringString);
-      String? token = userData['data'][0]['access_token'];
+            // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
+      }
       print('Retrieved Token: $token');
       final client = RetryClient(
         http.Client(),
@@ -88,13 +86,13 @@ class ServiceProvider extends StateNotifier<ServiceModel> {
       loadingState.state = true;
       // Retrieve the token from SharedPreferences
       print('geet srvice');
-      final pref = await SharedPreferences.getInstance();
-      String? userDataString = pref.getString('userData');
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
+           // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
+
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
       }
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
       print('Retrieved Token: $token');
       // Initialize RetryClient for handling retries
       final client = RetryClient(
@@ -150,21 +148,13 @@ class ServiceProvider extends StateNotifier<ServiceModel> {
 
     try {
       print('service update....................');
-      // Retrieve the token from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      String? userDataString = prefs.getString('userData');
-
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
-      }
-
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
+      // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
       if (token == null || token.isEmpty) {
-        throw Exception("User token is invalid. Please log in again.");
+        throw Exception("Access token is missing. Please log in again.");
       }
-
       print('Retrieved Token: $token');
       // ✅ Validate Service ID
       if (serviceId == null || serviceId.isEmpty) {
@@ -239,19 +229,14 @@ Future<bool> deleteService(
       
     loadingState.state = true; // Show loading state
     
-    final prefs = await SharedPreferences.getInstance();
-      String? userDataString = prefs.getString('userData');
+    // ✅ Get token directly from loginProvider model
+      final currentUser = ref.read(loginProvider);
+      final token = currentUser.data?.first.accessToken;
 
-      if (userDataString == null || userDataString.isEmpty) {
-        throw Exception("User token is missing. Please log in again.");
+      if (token == null || token.isEmpty) {
+        throw Exception("Access token is missing. Please log in again.");
       }
 
-      final Map<String, dynamic> userData = jsonDecode(userDataString);
-      String? token = userData['data'][0]['access_token'];
-      
-     if (token == null || token.isEmpty) {
-      throw Exception("User token is missing. Please log in again.");
-    }
     final client = RetryClient(
       http.Client(),
       retries: 4,

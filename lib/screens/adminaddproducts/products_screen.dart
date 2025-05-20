@@ -275,7 +275,7 @@ Widget _buildSparePartItem(
 
         /// **Price**
         Text(
-          '₹${sparePart.price ?? 0}',
+          'category${sparePart.productDescription ?? "---"}',
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
         ),
 
