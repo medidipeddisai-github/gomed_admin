@@ -107,7 +107,7 @@ Widget _buildUserList(List<Data> distributors) {
     itemCount: distributors.length,
     itemBuilder: (context, index) {
       final distributor = distributors[index];
-      bool isActive = distributor.status == "Active";
+      bool isActive = distributor.status == "active";
 
       return GestureDetector(
         onTap: () => _showDistributorDetails(context, distributor),

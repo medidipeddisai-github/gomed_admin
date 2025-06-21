@@ -112,7 +112,7 @@ Future<bool> updateDistributorStatus(String distributorId, bool newStatus) async
         "Authorization": "Bearer $token",
       },
       body: jsonEncode({
-        "status": newStatus ? "Active" : "Inactive",
+        "status": newStatus ? "active" : "inactive",
       }),
     );
 

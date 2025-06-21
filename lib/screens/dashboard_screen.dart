@@ -51,7 +51,7 @@ class dashboardscreenstate extends ConsumerState<DashboardScreen>{
 
     final int activeVendors = vendors.where((vendor) => vendor.status == "Active").length;
 
-    final int availableServices = services.where((service) => service.activated == true).length;
+    final int availableServices = services.length;
 
     final int activeServiceEngineers = serviceEngineers.where((engineer) => engineer.status == "active").length;
 

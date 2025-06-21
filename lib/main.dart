@@ -80,14 +80,7 @@ class _MyAppState extends ConsumerState<MyApp> {
       debugShowCheckedModeBanner: false,
       scaffoldMessengerKey: globalMessengerKey,
       home: Consumer(builder: (context, ref, child) {
-        // print("build main.dart");
-
-        // final authState = ref.watch(loginProvider);
-        // // Watch the authentication state
-        // // Check for a valid access token
-        // final accessToken = authState.data?.isNotEmpty == true
-        //     ? authState.data![0].accessToken: null;
-
+       
         print('token/main $accessToken');
         // // Check if the user has a valid refresh token
         if (accessToken != null && accessToken.isNotEmpty) {
