@@ -63,7 +63,7 @@ class _MyAppState extends ConsumerState<MyApp> {
             isConnected ? '✅ Back online' : '🚫 No internet connection',
           ),
           backgroundColor: isConnected ? Colors.green : Colors.red,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 4),
         ),
       );
     });

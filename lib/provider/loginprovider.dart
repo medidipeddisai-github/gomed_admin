@@ -236,11 +236,9 @@ Future<String> restoreAccessToken() async {
     WidgetRef ref,
   ) async {
     final prefs = await SharedPreferences.getInstance();
-    final userModel =
-        ref.read(loginProvider); // Retrieve UserModel from the provider
+    final userModel =ref.read(loginProvider); // Retrieve UserModel from the provider
     final userId = userModel.data![0].user?.sId;// Get user ID, default to empty string if null
-    final token = userModel
-        .data?[0].accessToken; // Get token, default to empty string if null
+    final token = userModel.data?[0].accessToken; // Get token, default to empty string if null
     final loadingState = ref.read(loadingProvider.notifier);
 
     // final userId = prefs.getString('userId');
